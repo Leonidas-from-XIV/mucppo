@@ -1,31 +1,15 @@
 (* trivial cppo replacement with just enough features to do conditional compilation *)
 
-let if_ocaml_version =
-  Re.(compile @@ seq [
-      bol; rep blank;
-      str "#if"; rep1 space;
-      str "OCAML_VERSION"; rep1 space;
-      str ">="; rep1 space;
-      char '(';
-      group (rep1 digit);
-      rep1 (set ", ");
-      group (rep1 digit);
-      rep1 (set ", ");
-      group (rep1 digit);
-      char ')'
-    ])
+let version_triple major minor patch = (major, minor, patch)
 
-let version_extract =
-  Re.(compile @@ seq [
-      group (rep1 digit);
-      char '.';
-      group (rep1 digit);
-      char '.';
-      group (rep1 digit)
-    ])
+let if_ocaml_version s =
+  (* Sscanf.sscanf_opt exists but only since 5.0 *)
+  match Scanf.sscanf s "#if OCAML_VERSION >= (%u, %u, %u)" version_triple  with
+  | v -> Some v
+  | exception _ -> None
 
 let current_version =
-  Scanf.sscanf Sys.ocaml_version "%u.%u.%u" (fun a b c -> (a, b, c))
+  Scanf.sscanf Sys.ocaml_version "%u.%u.%u" version_triple
 
 let greater_or_equal (v : (int * int * int)) = current_version >= v
 
@@ -72,21 +56,12 @@ let rec loop ic ~lineno vars =
      | "#else" -> next (State.flip_top vars)
      | "#endif" -> next (State.pop vars)
      | trimmed_line when is_if_statement trimmed_line ->
-       (match Re.exec_opt if_ocaml_version line with
+       (match if_ocaml_version line with
         | None ->
           failwith
             (Printf.sprintf "Parsing #if in line %d failed, exiting" lineno)
-        | Some groups ->
-          let group = Re.Group.get_opt groups in
-          (match group 1, group 2, group 3 with
-           | Some major, Some minor, Some patch ->
-             let major = int_of_string major in
-             let minor = int_of_string minor in
-             let patch = int_of_string patch in
-             next (State.push (greater_or_equal (major, minor, patch)) vars)
-           | _ ->
-             failwith
-               (Printf.sprintf "Parsing #if in line %d failed, exiting" lineno)))
+        | Some (major, minor, patch) ->
+           next (State.push (greater_or_equal (major, minor, patch)) vars))
      | _trimmed_line ->
        if State.should_output vars then print_endline line;
        next vars)
