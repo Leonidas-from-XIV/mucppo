@@ -1,2 +1,3 @@
 (executable
-  (public_name mucppo))
+ (public_name mucppo)
+ (modules mucppo))
