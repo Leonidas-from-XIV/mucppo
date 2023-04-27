@@ -9,6 +9,7 @@ homepage: "https://github.com/Leonidas-from-XIV/mucppo"
 bug-reports: "https://github.com/Leonidas-from-XIV/mucppo/issues"
 depends: [
   "dune" {>= "3.7"}
+  "ocaml" {>= "4.02.3"}
   "odoc" {with-doc}
 ]
 build: [
