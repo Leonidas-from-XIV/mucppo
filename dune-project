@@ -1,5 +1,6 @@
 (lang dune 3.7)
 (name mucppo)
+(cram enable)
 
 (generate_opam_files true)
 
