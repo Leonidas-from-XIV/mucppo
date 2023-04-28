@@ -40,18 +40,29 @@ end
 let is_if_statement s =
   String.length s >= 3 && String.equal (String.sub s 0 3) "#if"
 
-let rec loop ic ~lineno vars =
+let is_include_statement s =
+  String.length s >= 8 && String.equal (String.sub s 0 8) "#include"
+
+let filename_of_include s = Scanf.sscanf s "#include %S" (fun x -> x)
+
+let rec loop ic ~lineno ~filename vars =
   match input_line ic with
   | line -> (
-      let next = loop ic ~lineno:(Int.succ lineno) in
+      let next = loop ic ~lineno:(Int.succ lineno) ~filename in
       match String.trim line with
       | "#else" -> next (State.flip_top vars)
       | "#endif" -> next (State.pop vars)
+      | trimmed_line when is_include_statement trimmed_line ->
+          let filename = filename_of_include trimmed_line in
+          let included_ic = open_in filename in
+          loop included_ic ~lineno:1 ~filename vars;
+          next vars
       | trimmed_line when is_if_statement trimmed_line -> (
           match if_ocaml_version line with
           | None ->
               failwith
-                (Printf.sprintf "Parsing #if in line %d failed, exiting" lineno)
+                (Printf.sprintf "Parsing #if in file %s line %d failed, exiting"
+                   filename lineno)
           | Some (major, minor, patch) ->
               next (State.push (greater_or_equal (major, minor, patch)) vars))
       | _trimmed_line ->
@@ -61,4 +72,4 @@ let rec loop ic ~lineno vars =
       if not (State.is_empty vars) then
         failwith "Output stack messed up, missing #endif?"
 
-let () = loop stdin ~lineno:1 State.empty
+let () = loop stdin ~lineno:1 ~filename:"<stdin>" State.empty
