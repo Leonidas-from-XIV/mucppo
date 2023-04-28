@@ -37,12 +37,12 @@ end = struct
   let push state l = { state; was_flipped = false } :: l
 end
 
-let is_if_statement s =
-  String.length s >= 3 && String.equal (String.sub s 0 3) "#if"
+let starts_with ~prefix s =
+  let len = String.length prefix in
+  String.length s >= len && String.equal (String.sub s 0 len) prefix
 
-let is_include_statement s =
-  String.length s >= 8 && String.equal (String.sub s 0 8) "#include"
-
+let is_if_statement = starts_with ~prefix:"#if"
+let is_include_statement = starts_with ~prefix:"#include"
 let filename_of_include s = Scanf.sscanf s "#include %S" (fun x -> x)
 
 let rec loop ic ~lineno ~filename vars =
