@@ -8,6 +8,7 @@ Simple test for futuristic OCaml version
   > #endif
   > EOF
   $ mucppo < high-version.ml
+  OCaml
 
 Also for a very old version
 
@@ -19,3 +20,4 @@ Also for a very old version
   > #endif
   > EOF
   $ mucppo < low-version.ml
+  OCaml 1.0.0 or newer
