@@ -6,6 +6,7 @@
 
 (source (github Leonidas-from-XIV/mucppo))
 (maintainers "marek@xivilization.net")
+(license "CC0-1.0")
 
 (package
   (name mucppo)

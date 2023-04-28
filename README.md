@@ -63,6 +63,9 @@ rarely used and make codebases hard to read.
 License
 -------
 
-As it is meant to be embedded the code is meant to be public domain and thus
-can be relicensed to whatever the project it ends up being embedded is licensed
-under.
+ [![License: CC0-1.0](https://licensebuttons.net/l/zero/1.0/80x15.png)](http://creativecommons.org/publicdomain/zero/1.0/)
+
+As µCPPO is meant to be vendored into projects, the code is public domain in as
+far as possible under international law. Therefore it is under
+[CC0](https://creativecommons.org/share-your-work/public-domain/cc0/) to
+facilitate relicensing and reuse.

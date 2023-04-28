@@ -5,6 +5,7 @@ description: """
 This package provides a single-file no-dependency reimplementation of a
 subset of CPPO that is meant to be used in packages that use dune."""
 maintainer: ["marek@xivilization.net"]
+license: "CC0-1.0"
 homepage: "https://github.com/Leonidas-from-XIV/mucppo"
 bug-reports: "https://github.com/Leonidas-from-XIV/mucppo/issues"
 depends: [
