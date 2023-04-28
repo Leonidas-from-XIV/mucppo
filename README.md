@@ -50,6 +50,16 @@ Then preprocess the files that need CPPO like so:
             (run ./mucppo/mucppo.exe compat.pp.ml))))
 ```
 
+Supported features
+------------------
+
+* OCaml version comparison: `#if OCAML_VERSION >= (major, minor, patch)`
+* Inclusion of other files: `#include`
+
+Unless otherwise stated, other features are not implemented. Notably, macros
+and macros with arguments are unlikely to ever get implemented, as they are
+rarely used and make codebases hard to read.
+
 License
 -------
 
