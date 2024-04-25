@@ -67,3 +67,34 @@ branch:
   > EOF
   $ mucppo < elif.ml
   Should print
+
+Nested ifdefs should work:
+
+  $ cat > nested.ml <<EOF
+  > #define STRING
+  > Nested with false condition:
+  > #ifdef VARIANT
+  > #ifdef STRING
+  > Should not print
+  > #endif
+  > #else
+  > VARIANT wasn't defined
+  > #endif
+  > Unnested:
+  > #ifdef STRING
+  > Should print
+  > #endif
+  > Nested with true condition:
+  > #ifdef STRING
+  > #ifdef STRING
+  > Should print
+  > #endif
+  > #endif
+  > EOF
+  $ mucppo < nested.ml
+  Nested with false condition:
+  VARIANT wasn't defined
+  Unnested:
+  Should print
+  Nested with true condition:
+  Should print

@@ -10,25 +10,27 @@ module PrintingState : sig
   val empty : t
   val is_empty : t -> bool
   val flip_top : t -> t
-  val top_was_triggered : t -> bool
-  val top : t -> bool
+  val latest_was_triggered : t -> bool
   val pop : t -> t
   val push : bool -> t -> t
+  val should_print : t -> bool
 end = struct
   type state = { state : bool; was_true : bool }
   type t = state list
 
-  let empty = [ { state = true; was_true = true } ]
+  let empty = [ { state = true; was_true = false } ]
   let is_empty (x : t) = x = empty
 
   let flip_top = function
     | [] -> failwith "Output stack empty, invalid state"
     | x :: xs -> { state = not x.state; was_true = true } :: xs
 
-  let top_was_triggered l = (List.hd l).was_true
-  let top l = (List.hd l).state
+  let latest_was_triggered l = (List.hd l).was_true
   let pop = List.tl
   let push state l = { state; was_true = state } :: l
+
+  let should_print =
+    List.fold_left (fun acc { state; was_true = _ } -> state && acc) true
 end
 
 module Variables = struct
@@ -73,9 +75,9 @@ module State = struct
 
   let conditional_triggered s = { s with ps = PrintingState.flip_top s.ps }
   let end_conditional s = { s with ps = PrintingState.pop s.ps }
-  let triggered_before s = PrintingState.top_was_triggered s.ps
+  let triggered_before s = PrintingState.latest_was_triggered s.ps
   let start_conditional v s = { s with ps = PrintingState.push v s.ps }
-  let should_output { ps; vars = _ } = PrintingState.top ps
+  let should_output { ps; vars = _ } = PrintingState.should_print ps
 
   let don't_print s =
     match should_output s with
