@@ -1,4 +1,12 @@
-(* trivial cppo replacement with just enough features to do conditional compilation *)
+(* mucppo Copyright 2023-2024 Marek Kubica <marek@tarides.com>
+ * Released under CC0 license, freely available to all.
+ *
+ * Simple, no dependency cppo replacement to be embedded into builds.
+ *
+ * Contains a bare subset of cppo features to eliminate it as a dependency.
+ * For more info check the project page at
+ * https://github.com/Leonidas-from-XIV/mucppo
+ *)
 
 let version_triple major minor patch = (major, minor, patch)
 let current_version = Scanf.sscanf Sys.ocaml_version "%u.%u.%u" version_triple
