@@ -106,7 +106,7 @@ let output_endline oc s =
 let rec loop ic oc ~lineno ~filename st =
   match input_line ic with
   | line -> (
-      let next = loop ic oc ~lineno:(Int.succ lineno) ~filename in
+      let next = loop ic oc ~lineno:(succ lineno) ~filename in
       match String.trim line with
       | "#else" -> (
           match State.triggered_before st with
