@@ -75,10 +75,14 @@ module State = struct
   let is_defined v (_ps, vars) = Variables.is_defined v vars
 end
 
-let rec loop ic ~lineno ~filename vars =
+let output_endline oc s =
+  output_string oc s;
+  output_char oc '\n'
+
+let rec loop ic oc ~lineno ~filename vars =
   match input_line ic with
   | line -> (
-      let next = loop ic ~lineno:(Int.succ lineno) ~filename in
+      let next = loop ic oc ~lineno:(Int.succ lineno) ~filename in
       match String.trim line with
       | "#else" -> next (State.flip_condition vars)
       | "#endif" -> next (State.pop vars)
@@ -93,7 +97,7 @@ let rec loop ic ~lineno ~filename vars =
       | trimmed_line when is_include_statement trimmed_line ->
           let filename = filename_of_include trimmed_line in
           let included_ic = open_in filename in
-          loop included_ic ~lineno:1 ~filename vars;
+          loop included_ic oc ~lineno:1 ~filename vars;
           next vars
       | trimmed_line when is_ifdef trimmed_line ->
           let var = variable_of_ifdef trimmed_line in
@@ -109,10 +113,35 @@ let rec loop ic ~lineno ~filename vars =
           | Some (major, minor, patch) ->
               next (State.push (greater_or_equal (major, minor, patch)) vars))
       | _trimmed_line ->
-          if State.should_output vars then print_endline line;
+          if State.should_output vars then output_endline oc line;
           next vars)
   | exception End_of_file ->
       if not (State.is_empty vars) then
         failwith "Output stack messed up, missing #endif?"
 
-let () = loop stdin ~lineno:1 ~filename:"<stdin>" State.empty
+let () =
+  let output_file = ref None in
+  let input_file = ref None in
+  let speclist =
+    [
+      ( "-o",
+        Arg.String (fun filename -> output_file := Some filename),
+        "Set output file name" );
+    ]
+  in
+  let anonymous filename = input_file := Some filename in
+  let usage = "mucppo -o <output> <file>" in
+  Arg.parse speclist anonymous usage;
+  let ic, filename =
+    match !input_file with
+    | Some filename -> (open_in filename, filename)
+    | None -> (stdin, "<stdin>")
+  in
+  let oc =
+    match !output_file with
+    | Some filename -> open_out filename
+    | None -> stdout
+  in
+  loop ic oc ~lineno:1 ~filename State.empty;
+  close_in ic;
+  close_out oc
