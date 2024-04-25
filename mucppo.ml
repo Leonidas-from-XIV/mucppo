@@ -44,17 +44,18 @@ end
 module Variables = struct
   module Map = Map.Make (String)
 
-  (* type t = unit Map.t *)
-
   let is_defined name = Map.mem name
   let define name = Map.add name ()
   let undefine name = Map.remove name
   let empty = Map.empty
 end
 
+(* for OCaml 4.02 *)
+let string_equal = (=)
+
 let starts_with ~prefix s =
   let len = String.length prefix in
-  String.length s >= len && String.equal (String.sub s 0 len) prefix
+  String.length s >= len && string_equal (String.sub s 0 len) prefix
 
 let is_if_statement = starts_with ~prefix:"#if"
 let is_elif_defined_statement = starts_with ~prefix:"#elif defined"
